@@ -1,0 +1,24 @@
+services:
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    depends_on:
+      restic:
+        condition: service_healthy
+
+  restic:
+    build:  ../../
+    environment:
+      RESTIC_REPOSITORY: /mnt
+      RESTIC_PASSWORD: "1234"
+      BACKUP_SCHEDULE: "* * * * *"
+    volumes:
+      - postgres:/data/postgres
+      - ./.data:/mnt
+
+volumes:
+  postgres: {}
+  

@@ -1,0 +1,10 @@
+.git
+*.md
+*.yml
+*.yaml
+.github
+.data
+test.sh
+LICENSE
+Dockerfile
+tests
