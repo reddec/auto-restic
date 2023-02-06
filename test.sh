@@ -6,58 +6,58 @@ CASE="${1:-local}"
 export COMPOSE_FILE="tests/$CASE/docker-compose.yaml"
 
 function wait_for_start {
-    # count expected
-    expected_count=""
-    # wait for boot
-    echo "wait for boot..."
-    for i in {1..120}
-    do
-        echo "attempt $i - checking containers"
-        if [ "$(docker compose ps -q | wc -l | tr -d ' ')" == "2" ]; then
-            return
-        fi
-        sleep "$INTERVAL"
-    done
-    exit 1
+  # count expected
+  expected_count=""
+  # wait for boot
+  echo "wait for boot..."
+  for i in {1..120}; do
+    echo "attempt $i - checking containers"
+    if [ "$(docker compose ps -q | wc -l | tr -d ' ')" == "2" ]; then
+      return
+    fi
+    sleep "$INTERVAL"
+  done
+  exit 1
 }
 
 function wait_for_postgres {
-    for i in {1..120}
-    do
-        if [ "$(docker compose exec db ls -A /var/run/postgresql)" ]; then
-            return
-        fi
-        sleep "$INTERVAL"
-    done
-    exit 1
+  for i in {1..120}; do
+    if [ "$(docker compose exec db ls -A /var/run/postgresql)" ]; then
+      return
+    fi
+    sleep "$INTERVAL"
+  done
+  exit 1
 }
 
 function validate_data {
-    # test data result
-    EXPECTED='id,value
+  # test data result
+  EXPECTED='id,value
 1,foo
 2,bar
 (2 rows)'
 
-    DATA="$(echo 'SELECT * FROM test_data ORDER BY id' | docker compose exec -T -e PGPASSWORD=postgres db psql -U postgres -d postgres -A -F',')"
-    if [ "$EXPECTED" != "$DATA" ]; then
-        echo "data was corrupted"
-        exit 2
-    fi
+  DATA="$(echo 'SELECT * FROM test_data ORDER BY id' | docker compose exec -T -e PGPASSWORD=postgres db psql -U postgres -d postgres -A -F',')"
+  if [ "$EXPECTED" != "$DATA" ]; then
+    echo "data was corrupted"
+    exit 2
+  fi
 }
 
 # clean up
-docker ps -q | xargs -n 1 docker stop 
-docker ps -qa | xargs -n 1 docker rm
-docker volume ls -q | xargs -n 1 docker volume rm
-rm -rf tests/$CASE/.data
+
+if test -d tests/$CASE/.data; then
+  docker ps -q | xargs -n 1 docker stop
+  docker ps -qa | xargs -n 1 docker rm
+  docker volume ls -q | xargs -n 1 docker volume rm
+  rm -rf tests/$CASE/.data
+fi
 
 # first init
 docker compose build
 docker compose up -d
 wait_for_start
 wait_for_postgres
-
 
 # add data to DB
 
@@ -74,10 +74,8 @@ EOF
 echo "waiting for backup..."
 sleep 60
 
-
 # stop
 docker compose stop
-
 
 # case - double init
 echo "testing double initialization"
@@ -89,7 +87,7 @@ validate_data
 # case - restore
 
 # cleanup all except dir with snapshots
-docker ps -q | xargs -n 1 docker stop 
+docker ps -q | xargs -n 1 docker stop
 docker ps -qa | xargs -n 1 docker rm
 docker volume ls -q | xargs -n 1 docker volume rm
 
