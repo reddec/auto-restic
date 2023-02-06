@@ -1,7 +1,7 @@
 name: Sync with restic
 on:
   schedule:
-    - cron:  '20 * * * *'
+    - cron:  '25 * * * *'
 
 env:
   REGISTRY: ghcr.io
@@ -66,8 +66,14 @@ jobs:
         run: |
           docker buildx build --push \
           --platform linux/arm/v7,linux/arm64/v8,linux/amd64 \
-          --tag ghcr.io/reddec/auto-restic:${{  github.ref_name }}
+          --tag "ghcr.io/reddec/auto-restic:$(git describe --tags)"
 
       - name: Update tag if changed
         run: git push --tags
         if: steps.bump.outcome == 'success'
+
+      - name: Create release
+        run: |
+          gh release create "$(git describe --tags)" --notes "* use restic version: $(git describe --tags)"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
