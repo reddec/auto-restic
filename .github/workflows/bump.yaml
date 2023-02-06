@@ -1,7 +1,7 @@
 name: Sync with restic
 on:
   schedule:
-    - cron:  '51 * * * *'
+    - cron:  '2 * * * *'
 
 jobs:
   build:
@@ -20,11 +20,13 @@ jobs:
       - name: Pull tag
         run: git fetch --tags
 
-      - name: bump
+      - name: Bump version
+        id: bump
         run: ./bump.sh
         continue-on-error: true
 
-      - name: test
+      - name: Test
+        id: test
         run: ./test.sh
         if: steps.bump.outcome == 'success'
         continue-on-error: true # workaround to make next step work
