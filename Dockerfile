@@ -14,9 +14,6 @@ ENV \
     BACKUP_PRUNE="@daily" \
     # How many old backups to keep during pruning
     BACKUP_DEPTH="7" \
-    # Directory to backup/restore
-    # Important! application will write .restored file there, so use subfolders to mount volumes (usually service name)
-    BACKUP_DIR="/data" \
     #
     # Notifications section
     #
@@ -38,7 +35,10 @@ ENV \
     # Internal configuration, most probably you should never edit it
     #
     # HTTP address used for internal API to detect that container is healthy
-    API_ADDRESS="127.0.0.1:8080"
+    API_ADDRESS="127.0.0.1:8080" \
+    # Directory to backup/restore
+    # Important! application will write .restored file there, so use subfolders to mount volumes (usually service name)
+    BACKUP_DIR="/data" \
 
 # live data to backup/restore, should match BACKUP_DIR and MUST NOT be changed during restore
 VOLUME [ "/data" ]

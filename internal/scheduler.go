@@ -13,7 +13,11 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
+// max size in bytes to capture logs during init/restore to detect recoverable errors.
 const peekLog = 1024
+
+// file name in backup dir to mark system as restored
+const markerName = ".restored"
 
 type Config struct {
 	Schedule     string           `long:"schedule" env:"SCHEDULE" description:"Backup schedule" default:"@daily"`
@@ -58,6 +62,7 @@ func (app *App) Run(ctx context.Context) error {
 		return fmt.Errorf("restore: %w", err)
 	}
 
+	// add cron jobs for backup and prune
 	crontab := cron.New()
 	_, err = crontab.AddFunc(app.cfg.Schedule, func() {
 		app.taskBackup(ctx)
@@ -75,6 +80,7 @@ func (app *App) Run(ctx context.Context) error {
 
 	atomic.StoreInt32(&app.ready, 1)
 	defer atomic.StoreInt32(&app.ready, 0)
+
 	log.Println("ready")
 	crontab.Start()
 	<-ctx.Done()
@@ -118,7 +124,7 @@ func (app *App) runBackup(ctx context.Context) error {
 }
 
 func (app *App) runRestore(ctx context.Context) error {
-	markerFile := filepath.Join(app.cfg.Dir, ".restored")
+	markerFile := filepath.Join(app.cfg.Dir, markerName)
 	_, err := os.Stat(markerFile)
 	if err == nil {
 		log.Println("marker file exists - skipping restore")
