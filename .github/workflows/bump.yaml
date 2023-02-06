@@ -1,0 +1,35 @@
+name: Sync with restic
+on:
+  schedule:
+    - cron:  '0 0 * * *'
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build:
+    name: Bump version and test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Checkout LFS objects
+        run: git lfs checkout
+
+      - name: Pull tag
+        run: git fetch --tags
+
+      - name: bump
+        run: ./bump.sh
+
+      - name: test
+        run: ./test.sh
+        if: steps.bump.outcome == 'success'
+
+      - name: Update tag if changed
+        run: git push --tags
+        if: steps.test.outcome == 'success'
