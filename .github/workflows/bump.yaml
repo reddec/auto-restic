@@ -1,7 +1,7 @@
 name: Sync with restic
 on:
   schedule:
-    - cron:  '1 * * * *'
+    - cron:  '3 * * * *'
 
 env:
   REGISTRY: ghcr.io
