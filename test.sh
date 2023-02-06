@@ -7,12 +7,12 @@ export COMPOSE_FILE="tests/$CASE/docker-compose.yaml"
 
 function wait_for_start {
   # count expected
-  expected_count=""
+  expected_count="$(docker compose ps -qa | wc -l | tr -d ' ')"
   # wait for boot
   echo "wait for boot..."
   for i in {1..120}; do
     echo "attempt $i - checking containers"
-    if [ "$(docker compose ps -q | wc -l | tr -d ' ')" == "2" ]; then
+    if [ "$(docker compose ps -q | wc -l | tr -d ' ')" == "${expected_count}" ]; then
       return
     fi
     sleep "$INTERVAL"
@@ -61,6 +61,7 @@ rm -rf tests/$CASE/.data
 
 # first init
 docker compose build
+docker compose create
 docker compose up -d
 wait_for_start
 wait_for_postgres
@@ -85,6 +86,7 @@ docker compose stop
 
 # case - double init
 echo "testing double initialization"
+docker compose create
 docker compose up -d
 wait_for_start
 wait_for_postgres
@@ -98,6 +100,7 @@ docker ps -qa | xargs -n 1 docker rm
 docker volume ls -q | xargs -n 1 docker volume rm
 
 echo "testing recovery"
+docker compose create
 docker compose up -d
 wait_for_start
 wait_for_postgres

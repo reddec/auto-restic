@@ -1,7 +1,7 @@
 name: Sync with restic
 on:
   schedule:
-    - cron:  '24 * * * *'
+    - cron:  '47 * * * *'
 
 jobs:
   build:
@@ -37,6 +37,13 @@ jobs:
         if: steps.bump.outcome == 'success'
         continue-on-error: true # workaround to make next step work
 
+      - name: Check tests results
+        id: check
+        if: steps.bump.outcome == 'success' && (steps.test_local.outcome != 'success' || steps.test_s3.outcome != 'success')
+        run: |
+          echo "tests failed"
+          exit 1
+
       - name: Update tag if changed
         run: git push --tags
-        if: steps.test_local.outcome == 'success' && steps.test_s3.outcome == 'success'
+        if: steps.bump.outcome == 'success'
