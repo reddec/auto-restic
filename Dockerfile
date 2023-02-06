@@ -38,7 +38,7 @@ ENV \
     API_ADDRESS="127.0.0.1:8080" \
     # Directory to backup/restore
     # Important! application will write .restored file there, so use subfolders to mount volumes (usually service name)
-    BACKUP_DIR="/data" \
+    BACKUP_DIR="/data"
 
 # live data to backup/restore, should match BACKUP_DIR and MUST NOT be changed during restore
 VOLUME [ "/data" ]

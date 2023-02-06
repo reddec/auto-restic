@@ -46,12 +46,18 @@ function validate_data {
 
 # clean up
 
-if test -d tests/$CASE/.data; then
+if [ "$(docker ps -q)" ]; then
   docker ps -q | xargs -n 1 docker stop
-  docker ps -qa | xargs -n 1 docker rm
-  docker volume ls -q | xargs -n 1 docker volume rm
-  rm -rf tests/$CASE/.data
 fi
+
+if [ "$(docker ps -qa)" ]; then
+  docker ps -qa | xargs -n 1 docker rm
+fi
+
+if [ "$(docker volume ls -q)" ]; then
+  docker volume ls -q | xargs -n 1 docker volume rm
+fi
+rm -rf tests/$CASE/.data
 
 # first init
 docker compose build
