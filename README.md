@@ -7,7 +7,6 @@ backup.
 
 Originally it was just bunch of shell scripts. But eventually, it logic became too complicated to fit bash.
 
-
 Features
 
 - Read-Only file system. No writing to file (except `/data`)
@@ -45,41 +44,25 @@ services:
       - postgres:/data/postgres
 
 volumes:
-  postgres: {}
-  
+  postgres: { }
+
 ```
 
 > Note! It's designed to work as part of docker and never designed to be run as standalone application (however, it's
-still possible - just change all paths in configuration).
-
+> still possible - just change all paths in configuration).
 
 ## Auto-build
 
-
 Automatically builds & tests each restic releases.
 
+Tests cover:
 
-test-case:
+- auto initialization
+- double initialization
+- backup
+- restore
+- for local and S3-like repository
 
-# init
-
-- run & wait for boot
-- insert data
-- wait for 1 minute (to backup)
-- stop
-
-# double init
-
-- run & wait for boot again
-- check data
-- stop
-
-- remove volumes
-
-# restore
-
-- start & wait for boot
-- check data
 
 ## Configuration
 
