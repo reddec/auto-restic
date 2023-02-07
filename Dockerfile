@@ -42,6 +42,6 @@ ENV \
 
 # live data to backup/restore, should match BACKUP_DIR and MUST NOT be changed during restore
 VOLUME [ "/data" ]
-HEALTHCHECK --retries=1 --interval=5s --timeout=3s CMD ["/usr/bin/auto-restic", "ready"]
+HEALTHCHECK --start-period=10s --retries=3 --interval=10s --timeout=3s CMD ["/usr/bin/auto-restic", "ready"]
 ENTRYPOINT [ "" ]
 CMD [ "/usr/bin/auto-restic", "run" ]
