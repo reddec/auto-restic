@@ -78,3 +78,4 @@ jobs:
           gh release create "$(git describe --tags)" --notes "* use restic version: $(git describe --tags)"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: steps.bump.outcome == 'success'
