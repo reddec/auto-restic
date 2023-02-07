@@ -32,7 +32,7 @@ services:
         condition: service_healthy
 
   backup:
-    build: ghcr.io/reddec/auto-restic:0.0.1
+    build: ghcr.io/reddec/auto-restic:0.15.1
     environment:
       BACKUP_SCHEDULE: "@daily"
       RESTIC_PASSWORD: "backup-encryption-p@ssw0rd"
