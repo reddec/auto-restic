@@ -5,7 +5,7 @@ RUN go mod download && go mod verify
 COPY . .
 RUN CGO_ENABLED=0 go build -v -o /usr/local/bin/auto-restic ./cmd/auto-restic
 
-FROM restic/restic:0.15.1
+FROM restic/restic:0.15.2
 COPY --from=builder /usr/local/bin/auto-restic /usr/bin/auto-restic
 ENV \
     # Cron expression for backups
