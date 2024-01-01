@@ -1,7 +1,8 @@
-name: Sync with restic
+name: Sync with restic by tag
 on:
-  schedule:
-    - cron:  '0 * * * *'
+  push:
+    tags:
+      - 'v*'
 
 env:
   REGISTRY: ghcr.io
@@ -34,51 +35,20 @@ jobs:
       - name: Checkout LFS objects
         run: git lfs checkout
 
-      - name: Pull tag
-        run: git fetch --tags
-
-      - name: Bump version
-        id: bump
-        run: ./bump.sh
-        continue-on-error: true
-
       - name: Test local
         id: test_local
         run: ./test.sh local
-        if: steps.bump.outcome == 'success'
-        continue-on-error: true # workaround to make next step work
 
       - name: Test S3
         id: test_s3
         run: ./test.sh s3
-        if: steps.bump.outcome == 'success'
-        continue-on-error: true # workaround to make next step work
-
-      - name: Check tests results
-        id: check
-        if: steps.bump.outcome == 'success' && (steps.test_local.outcome != 'success' || steps.test_s3.outcome != 'success')
-        run: |
-          echo "tests failed"
-          exit 1
 
       - name: Build and push
-        if: steps.bump.outcome == 'success'
         run: |
-          docker buildx build --push --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --tag "ghcr.io/reddec/auto-restic:$(git describe --tags)" .
-
-      - name: Update tag if changed
-        run: |
-          git config --global user.email "${{github.actor}}@users.noreply.github.com"
-          git config --global user.name "${{github.actor}}"
-          git add -A
-          git commit -m "bump restic to $(git describe --tags)"
-          git push origin master
-          git push origin --tags
-        if: steps.bump.outcome == 'success'
+          docker buildx build --push --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --tag "ghcr.io/reddec/auto-restic:${GITHUB_REF_NAME}" .
 
       - name: Create release
         run: |
-          gh release create "$(git describe --tags)" --notes "* use restic version: $(git describe --tags)"
+          gh release create "${GITHUB_REF_NAME}" --notes "* use restic version: ${GITHUB_REF_NAME}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: steps.bump.outcome == 'success'
