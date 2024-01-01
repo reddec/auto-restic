@@ -2,7 +2,7 @@ name: Sync with restic by tag
 on:
   push:
     tags:
-      - 'v*'
+      - '*'
 
 env:
   REGISTRY: ghcr.io
